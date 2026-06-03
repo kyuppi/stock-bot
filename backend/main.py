@@ -1,11 +1,17 @@
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+import os
+
 from backend.bot import bot_state, WATCHLIST
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# -----------------------
+# static安全読み込み（クラッシュ防止）
+# -----------------------
+if os.path.exists("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 # -----------------------
@@ -32,7 +38,6 @@ def dashboard():
     <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
         <link rel="manifest" href="/static/manifest.json">
 
         <style>
@@ -70,11 +75,6 @@ def dashboard():
                 color:white;
             }}
 
-            .danger {{
-                background:#dc2626;
-                color:white;
-            }}
-
             input {{
                 width:100%;
                 padding:10px;
@@ -103,7 +103,6 @@ def dashboard():
             </div>
         </form>
 
-        <!-- 銘柄追加 -->
         <div class="panel">
             <h3>銘柄追加</h3>
             <form action="/add-stock" method="post">
@@ -113,12 +112,9 @@ def dashboard():
             </form>
         </div>
 
-        <!-- 利確・損切り -->
         <div class="panel">
             <h3>設定</h3>
-
             <form action="/set-risk" method="post">
-
                 <label>利確 %</label>
                 <input type="number" name="take_profit" value="2">
 
@@ -129,13 +125,11 @@ def dashboard():
             </form>
         </div>
 
-        <!-- 銘柄 -->
         <div class="panel">
             <h3>監視銘柄</h3>
             {watchlist_html}
         </div>
 
-        <!-- 価格 -->
         <div class="panel">
             <h3>価格</h3>
             {prices_html}
